@@ -16,24 +16,24 @@
   }
 
   :root {
-    --cream: #FFF8F0;
-    --cream-dark: #F5EDE0;
-    --blush: #F9D5E5;
-    --blush-mid: #F0A8C4;
-    --blush-deep: #D4638A;
-    --sage: #D4E8C2;
-    --sage-mid: #9FC97A;
-    --sage-deep: #4A8C2A;
-    --lavender: #E8E2FA;
-    --lavender-mid: #B8A8F0;
-    --lavender-deep: #7B61C9;
-    --sky: #D0E8FA;
-    --amber: #FAE0A0;
-    --amber-deep: #C8901A;
-    --espresso: #2C1A0E;
-    --espresso-light: #5C3D24;
-    --shadow-soft: 0 4px 20px rgba(44, 26, 14, 0.10);
-    --shadow-lift: 0 18px 40px rgba(44, 26, 14, 0.16);
+    --cream: #f7f9fc;
+    --cream-dark: #e5ebf2;
+    --blush: #dce8f2;
+    --blush-mid: #6f98b8;
+    --blush-deep: #173f5f;
+    --sage: #dde6df;
+    --sage-mid: #7e9d8f;
+    --sage-deep: #2e5e58;
+    --lavender: #e3e8f2;
+    --lavender-mid: #8094b8;
+    --lavender-deep: #314d73;
+    --sky: #ddeef7;
+    --amber: #e4d3ad;
+    --amber-deep: #8b6616;
+    --espresso: #121923;
+    --espresso-light: #52606e;
+    --shadow-soft: 0 8px 26px rgba(18, 25, 35, 0.08);
+    --shadow-lift: 0 24px 52px rgba(18, 25, 35, 0.14);
     --ease: cubic-bezier(.23, 1, .32, 1);
     --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
   }
@@ -45,7 +45,10 @@
 
   body {
     font-family: 'Nunito', sans-serif;
-    background: var(--cream);
+    background:
+      radial-gradient(circle at top left, rgba(111, 152, 184, 0.08), transparent 30%),
+      radial-gradient(circle at bottom right, rgba(126, 157, 143, 0.08), transparent 28%),
+      var(--cream);
     color: var(--espresso);
     min-height: 100vh;
     overflow-x: hidden;
@@ -62,6 +65,185 @@
   }
 
   a { color: inherit; }
+
+  .ambient-field {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .geo-field {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    perspective: 1800px;
+  }
+  .spotlight {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(circle at var(--spot-x, 50%) var(--spot-y, 30%), rgba(111, 152, 184, 0.12), transparent 18%),
+      radial-gradient(circle at calc(var(--spot-x, 50%) + 18%) calc(var(--spot-y, 30%) + 14%), rgba(126, 157, 143, 0.08), transparent 22%);
+    mix-blend-mode: soft-light;
+    transition: opacity 0.35s var(--ease);
+    opacity: 0.08;
+  }
+  .particle-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.26;
+    mix-blend-mode: screen;
+  }
+  .ambient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(8px);
+    opacity: 0.1;
+    mix-blend-mode: soft-light;
+    animation: ambientDrift 18s ease-in-out infinite;
+  }
+  .ambient-orb.a1 {
+    width: 260px;
+    height: 260px;
+    top: 8%;
+    left: -60px;
+    background: radial-gradient(circle, rgba(111, 152, 184, 0.35) 0%, rgba(111, 152, 184, 0.08) 50%, transparent 76%);
+  }
+  .ambient-orb.a2 {
+    width: 220px;
+    height: 220px;
+    top: 30%;
+    right: -70px;
+    background: radial-gradient(circle, rgba(126, 157, 143, 0.3) 0%, rgba(126, 157, 143, 0.08) 48%, transparent 74%);
+    animation-delay: -6s;
+  }
+  .ambient-orb.a3 {
+    width: 180px;
+    height: 180px;
+    bottom: 12%;
+    left: 22%;
+    background: radial-gradient(circle, rgba(128, 148, 184, 0.22) 0%, rgba(128, 148, 184, 0.06) 48%, transparent 74%);
+    animation-delay: -11s;
+  }
+  .geo-shape {
+    position: absolute;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform;
+    opacity: 0.45;
+    filter: drop-shadow(0 18px 26px rgba(18, 25, 35, 0.09));
+    transform: var(--base-transform, translate3d(0, 0, 0)) translate3d(var(--mouse-x, 0px), var(--mouse-y, 0px), 0) translate3d(0, calc(var(--parallax-y, 0px) + var(--float-y, 0px)), 0) rotateZ(var(--float-rot, 0deg)) scale(var(--float-scale, 1));
+  }
+  .geo-shape::before,
+  .geo-shape::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .geo-shape.shape-1 {
+    width: 150px;
+    height: 150px;
+    top: 12%;
+    right: 11%;
+    border-radius: 28px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.55), rgba(111, 152, 184, 0.12));
+    border: 1px solid rgba(255, 255, 255, 0.36);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 50px rgba(111, 152, 184, 0.10);
+    --base-transform: rotateX(62deg) rotateY(-25deg) rotateZ(18deg);
+  }
+  .geo-shape.shape-1::after {
+    inset: 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.12);
+  }
+  .geo-shape.shape-2 {
+    width: 118px;
+    height: 118px;
+    top: 46%;
+    left: 4%;
+    clip-path: polygon(50% 0%, 88% 24%, 88% 76%, 50% 100%, 12% 76%, 12% 24%);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(126, 157, 143, 0.14));
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 42px rgba(126, 157, 143, 0.10);
+    --base-transform: rotateX(58deg) rotateY(28deg) rotateZ(-14deg);
+  }
+  .geo-shape.shape-2::before {
+    inset: 12px;
+    clip-path: inherit;
+    background: linear-gradient(145deg, rgba(255,255,255,0.2), transparent 60%);
+  }
+  .geo-shape.shape-3 {
+    width: 92px;
+    height: 92px;
+    bottom: 16%;
+    right: 22%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), rgba(128, 148, 184, 0.16) 45%, rgba(128, 148, 184, 0.03) 72%);
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 34px rgba(128, 148, 184, 0.12);
+    --base-transform: rotateX(72deg) rotateY(-12deg) rotateZ(0deg);
+  }
+  .geo-shape.shape-4 {
+    width: 110px;
+    height: 110px;
+    top: 68%;
+    left: 14%;
+    border-radius: 32px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.42), rgba(111, 152, 184, 0.10));
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.56), 0 0 36px rgba(111, 152, 184, 0.10);
+    --base-transform: rotateX(68deg) rotateY(16deg) rotateZ(32deg);
+  }
+  .geo-shape.shape-5 {
+    width: 72px;
+    height: 72px;
+    top: 26%;
+    left: 50%;
+    border-radius: 24px;
+    background: linear-gradient(155deg, rgba(255,255,255,0.56), rgba(126, 157, 143, 0.12));
+    border: 1px solid rgba(255,255,255,0.38);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.58), 0 0 28px rgba(126, 157, 143, 0.10);
+    --base-transform: rotateX(72deg) rotateY(-18deg) rotateZ(-18deg);
+  }
+  .geo-shape.shape-6 {
+    width: 140px;
+    height: 140px;
+    bottom: 10%;
+    right: 6%;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    background: linear-gradient(145deg, rgba(255,255,255,0.42), rgba(128, 148, 184, 0.16));
+    border: 1px solid rgba(255,255,255,0.32);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.56), 0 0 38px rgba(128, 148, 184, 0.10);
+    --base-transform: rotateX(64deg) rotateY(20deg) rotateZ(12deg);
+  }
+  @keyframes ambientDrift {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(0, -18px, 0) scale(1.07); }
+  }
 
   /* ============ CUSTOM CURSOR ============ */
   .cursor {
@@ -106,7 +288,7 @@
     animation: fadeDown 0.8s ease both;
   }
   nav.scrolled {
-    background: rgba(255, 248, 240, 0.82);
+    background: rgba(246, 248, 251, 0.86);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 2px 24px rgba(44, 26, 14, 0.06);
@@ -150,14 +332,17 @@
   .nav-links a:hover::after { transform: scaleX(1); }
   .nav-links a:hover { color: var(--blush-deep); }
   .nav-cta {
-    background: var(--espresso);
+    background: linear-gradient(135deg, var(--espresso), #243241);
     color: var(--cream) !important;
     padding: 8px 18px;
     border-radius: 999px;
-    transition: transform 0.25s var(--ease-bounce);
+    transition: transform 0.25s var(--ease-bounce), box-shadow 0.25s var(--ease-bounce);
+    box-shadow: 0 10px 22px rgba(18, 25, 35, 0.14);
+    will-change: transform;
+    transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0);
   }
   .nav-cta::after { display: none; }
-  .nav-cta:hover { transform: translateY(-2px) scale(1.04); color: var(--cream) !important; }
+  .nav-cta:hover { transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0) translateY(-2px) scale(1.04); color: var(--cream) !important; box-shadow: 0 14px 30px rgba(18, 25, 35, 0.18); }
 
   .nav-toggle {
     display: none;
@@ -176,7 +361,8 @@
   }
 
   /* ============ SHARED SECTION STYLES ============ */
-  section { position: relative; overflow: hidden; }
+  section { position: relative; overflow: hidden; perspective: 1400px; }
+  section { z-index: 1; }
 
   .section-pad { padding: 7rem 3rem; }
 
@@ -184,7 +370,7 @@
     font-family: 'Playfair Display', serif;
     font-style: italic;
     font-size: 1.05rem;
-    color: var(--blush-deep);
+    color: var(--lavender-deep);
     margin-bottom: 0.5rem;
     display: inline-flex;
     align-items: center;
@@ -193,7 +379,7 @@
   .eyebrow::before {
     content: '';
     width: 26px; height: 1.5px;
-    background: var(--blush-mid);
+    background: var(--lavender-mid);
     display: inline-block;
   }
   .section-title {
@@ -221,7 +407,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--espresso);
+    background: linear-gradient(135deg, var(--espresso), #243241);
     color: var(--cream);
     font-family: 'Nunito', sans-serif;
     font-size: 0.9rem;
@@ -233,9 +419,11 @@
     text-decoration: none;
     letter-spacing: 0.03em;
     transition: transform 0.25s var(--ease-bounce), box-shadow 0.25s;
-    box-shadow: 0 4px 20px rgba(44, 26, 14, 0.18);
+    box-shadow: 0 10px 22px rgba(18, 25, 35, 0.16);
+    will-change: transform;
+    transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0);
   }
-  .btn-primary:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 8px 28px rgba(44, 26, 14, 0.22); }
+  .btn-primary:hover { transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0) translateY(-3px) scale(1.03); box-shadow: 0 14px 30px rgba(18, 25, 35, 0.2); }
   .btn-secondary {
     display: inline-flex;
     align-items: center;
@@ -252,13 +440,15 @@
     text-decoration: none;
     letter-spacing: 0.03em;
     transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    will-change: transform;
+    transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0);
   }
-  .btn-secondary:hover { background: var(--blush); border-color: var(--blush-deep); transform: translateY(-2px); }
+  .btn-secondary:hover { background: rgba(111, 152, 184, 0.12); border-color: var(--blush-deep); transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0) translateY(-2px); }
   .btn-arrow { font-size: 1.1rem; transition: transform 0.2s; }
   .btn-primary:hover .btn-arrow { transform: translateX(4px); }
 
   /* Background blobs (reusable) */
-  .blob-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .blob-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; transition: transform 0.15s linear; }
   .blob {
     position: absolute;
     border-radius: 50%;
@@ -300,6 +490,44 @@
   .reveal.d3 { transition-delay: 0.3s; }
   .reveal.d4 { transition-delay: 0.4s; }
   .reveal.d5 { transition-delay: 0.5s; }
+
+  .value-card,
+  .skill-card,
+  .project-card,
+  .tl-card,
+  .ach-card,
+  .edu-card,
+  .profile-card,
+  .contact-form {
+    position: relative;
+    overflow: hidden;
+  }
+  .value-card::before,
+  .skill-card::before,
+  .project-card::before,
+  .tl-card::before,
+  .ach-card::before,
+  .edu-card::before,
+  .profile-card::before,
+  .contact-form::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.35), transparent 38%, rgba(111, 152, 184, 0.08));
+    opacity: 0;
+    transition: opacity 0.35s var(--ease);
+    pointer-events: none;
+  }
+  .value-card:hover::before,
+  .skill-card:hover::before,
+  .project-card:hover::before,
+  .tl-card:hover::before,
+  .ach-card:hover::before,
+  .edu-card:hover::before,
+  .profile-card:hover::before,
+  .contact-form:hover::before {
+    opacity: 1;
+  }
 
   /* ============ HERO ============ */
   .hero {
@@ -377,8 +605,19 @@
 
   .hero-right { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; animation: fadeUp 1s var(--ease) 0.4s both; }
   .photo-scene { position: relative; width: 340px; height: 400px; }
-  .photo-blob-wrap { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 300px; height: 340px; animation: photoFloat 6s ease-in-out infinite; }
+  .photo-blob-wrap {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 340px;
+    animation: photoFloat 6s ease-in-out infinite;
+    transition: transform 0.45s var(--ease), filter 0.45s var(--ease);
+    transform-style: preserve-3d;
+  }
   @keyframes photoFloat { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-14px); } }
+  .photo-blob-wrap:hover { transform: translateX(-50%) translateY(-6px) rotateX(7deg) rotateY(-8deg); filter: drop-shadow(0 26px 40px rgba(23, 33, 43, 0.14)); }
   .photo-blob-bg {
     position: absolute;
     inset: 0;
@@ -457,22 +696,139 @@
   }
   .scroll-line { width: 1.5px; height: 40px; background: linear-gradient(to bottom, var(--blush-mid), transparent); animation: scrollPulse 2s ease infinite; }
   @keyframes scrollPulse { 0% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(0.3); transform-origin: top; } }
+  .scroll-badge {
+    position: fixed;
+    right: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(18, 25, 35, 0.08);
+    border-radius: 999px;
+    padding: 10px 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-soft);
+    color: var(--espresso-light);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    animation: scrollFloat 4s ease-in-out infinite;
+  }
+  .scroll-badge .scroll-pill {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--blush-mid);
+    box-shadow: 0 0 0 8px rgba(111, 152, 184, 0.15);
+  }
+  @keyframes scrollFloat {
+    0%, 100% { transform: translateY(-50%) translateX(0); }
+    50% { transform: translateY(-50%) translateX(-5px); }
+  }
 
   /* ============ ABOUT ============ */
   #about { background: var(--cream); }
   #about .blob-1 { width: 360px; height: 360px; background: var(--sage); top: -60px; left: -80px; animation-duration: 17s; }
   #about .blob-2 { width: 300px; height: 300px; background: var(--lavender); bottom: -60px; right: -60px; animation-duration: 15s; animation-delay: -5s; }
   .about-grid { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 4rem; align-items: center; }
-  .about-photo { position: relative; display: flex; align-items: center; justify-content: center; }
-  .about-blob {
-    width: 300px; height: 340px;
-    background: linear-gradient(135deg, var(--sage) 0%, var(--sky) 100%);
-    border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%;
-    display: flex; align-items: center; justify-content: center;
-    animation: morphBlob 9s ease-in-out infinite;
-    box-shadow: var(--shadow-soft);
+  .about-photo { position: relative; display: flex; align-items: center; justify-content: center; min-height: 360px; perspective: 1200px; }
+  .profile-card {
+    position: relative;
+    width: min(100%, 330px);
+    padding: 1.75rem;
+    border-radius: 28px;
+    background:
+      linear-gradient(160deg, rgba(255,255,255,0.96), rgba(255,255,255,0.82)),
+      linear-gradient(135deg, rgba(126, 169, 200, 0.12), rgba(137, 176, 155, 0.12));
+    box-shadow: var(--shadow-lift);
+    border: 1px solid rgba(23, 33, 43, 0.06);
+    transform-style: preserve-3d;
+    transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease);
+    overflow: hidden;
   }
-  .about-blob .photo-init { color: #fff; opacity: 0.85; }
+  .profile-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.25), transparent 45%);
+    pointer-events: none;
+  }
+  .profile-card::after {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    border-radius: 22px;
+    border: 1px solid rgba(23, 33, 43, 0.05);
+    pointer-events: none;
+  }
+  .profile-card:hover { transform: translateY(-8px) rotateX(8deg) rotateY(-7deg); box-shadow: 0 28px 60px rgba(23, 33, 43, 0.16); }
+  .profile-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lavender-deep);
+    margin-bottom: 1rem;
+  }
+  .profile-kicker::before {
+    content: '';
+    width: 26px;
+    height: 1.5px;
+    border-radius: 999px;
+    background: var(--lavender-mid);
+  }
+  .profile-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    line-height: 1.1;
+    margin-bottom: 0.2rem;
+    color: var(--espresso);
+  }
+  .profile-role {
+    color: var(--espresso-light);
+    margin-bottom: 1.1rem;
+    font-weight: 600;
+  }
+  .profile-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    margin-top: 1.2rem;
+  }
+  .profile-metrics div {
+    border-radius: 18px;
+    padding: 0.9rem 0.75rem;
+    background: rgba(255, 255, 255, 0.68);
+    border: 1px solid rgba(23, 33, 43, 0.05);
+    transform: translateZ(18px);
+  }
+  .profile-metrics span {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--blush-deep);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .profile-metrics small {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--espresso-light);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
   .about-photo .float-tag { position: absolute; }
   .about-photo .tag-a { top: 20px; right: -10px; animation: tagFloat 5s ease-in-out infinite; }
   .about-photo .tag-b { bottom: 36px; left: -20px; animation: tagFloat 6s ease-in-out infinite; animation-delay: -2s; }
@@ -491,8 +847,9 @@
     border-radius: 18px;
     padding: 1rem 1.1rem;
     transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+    transform-style: preserve-3d;
   }
-  .value-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lift); }
+  .value-card:hover { transform: translateY(-6px) rotateX(5deg) rotateY(-4deg); box-shadow: var(--shadow-lift); }
   .value-card .vc-emoji { font-size: 1.5rem; display: block; margin-bottom: 0.4rem; }
   .value-card h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; margin-bottom: 0.2rem; }
   .value-card p { font-size: 0.82rem; color: var(--espresso-light); margin: 0; }
@@ -500,6 +857,148 @@
   .vc-2 { background: var(--sage); }
   .vc-3 { background: var(--lavender); }
   .vc-4 { background: var(--amber); }
+
+  /* ============ EDUCATION ============ */
+  #education {
+    background:
+      radial-gradient(circle at 15% 10%, rgba(128, 148, 184, 0.18), transparent 24%),
+      radial-gradient(circle at 85% 20%, rgba(111, 152, 184, 0.14), transparent 22%),
+      linear-gradient(180deg, #fbfcfe 0%, var(--cream-dark) 100%);
+  }
+  #education .blob-1 { width: 340px; height: 340px; background: var(--lavender); top: -60px; right: -70px; animation-duration: 17s; }
+  #education .blob-2 { width: 280px; height: 280px; background: var(--sky); bottom: -50px; left: -50px; animation-duration: 19s; animation-delay: -6s; }
+  .education-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 1;
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+  .education-orb::before {
+    content: '';
+    position: absolute;
+    inset: 16%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.36);
+    filter: blur(18px);
+  }
+  .education-orb.orb-1 {
+    width: 92px;
+    height: 92px;
+    top: 12%;
+    left: 10%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(111, 152, 184, 0.45) 42%, rgba(111, 152, 184, 0.08) 72%, transparent 75%);
+  }
+  .education-orb.orb-2 {
+    width: 120px;
+    height: 120px;
+    top: 18%;
+    right: 8%;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), rgba(126, 157, 143, 0.4) 40%, rgba(126, 157, 143, 0.08) 72%, transparent 75%);
+    animation-delay: -3s;
+  }
+  .education-orb.orb-3 {
+    width: 70px;
+    height: 70px;
+    bottom: 18%;
+    left: 18%;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.95), rgba(128, 148, 184, 0.35) 42%, rgba(128, 148, 184, 0.06) 74%, transparent 77%);
+    animation-delay: -5s;
+  }
+  @keyframes orbFloat {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(0, -16px, 24px) scale(1.05); }
+  }
+  .education-timeline {
+    position: relative;
+    z-index: 2;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .education-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--lavender-mid), var(--blush-mid), var(--sage-mid));
+    transform: translateX(-50%);
+    border-radius: 2px;
+  }
+  .edu-item {
+    position: relative;
+    width: 50%;
+    padding: 0 2.6rem 2.2rem;
+  }
+  .edu-item:nth-child(odd) { left: 0; text-align: right; }
+  .edu-item:nth-child(even) { left: 50%; }
+  .edu-dot {
+    position: absolute;
+    top: 6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    border: 4px solid var(--lavender-deep);
+    z-index: 2;
+  }
+  .edu-item:nth-child(odd) .edu-dot { right: -9px; }
+  .edu-item:nth-child(even) .edu-dot { left: -9px; border-color: var(--sage-deep); }
+  .edu-card {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 1.7rem 1.8rem;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(18, 25, 35, 0.06);
+    transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+    transform-style: preserve-3d;
+    position: relative;
+    overflow: hidden;
+  }
+  .edu-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.45), transparent 42%, rgba(111, 152, 184, 0.08));
+    pointer-events: none;
+  }
+  .edu-card:hover { transform: translateY(-6px) rotateX(4deg) rotateY(-4deg); box-shadow: var(--shadow-lift); }
+  .edu-year {
+    display: inline-block;
+    background: var(--blush);
+    color: var(--blush-deep);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 4px 14px;
+    border-radius: 999px;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+  }
+  .edu-item:nth-child(even) .edu-year { background: var(--sage); color: var(--sage-deep); }
+  .edu-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.28rem;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+    color: var(--espresso);
+  }
+  .edu-card .edu-school {
+    font-weight: 700;
+    color: var(--espresso-light);
+    font-size: 0.92rem;
+    margin-bottom: 0.75rem;
+  }
+  .edu-card p {
+    color: var(--espresso-light);
+    font-size: 0.92rem;
+    margin: 0;
+  }
 
   /* ============ SKILLS ============ */
   #skills { background: var(--cream-dark); }
@@ -513,8 +1012,9 @@
     box-shadow: var(--shadow-soft);
     border: 1px solid rgba(44, 26, 14, 0.04);
     transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+    transform-style: preserve-3d;
   }
-  .skill-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lift); }
+  .skill-card:hover { transform: translateY(-8px) rotateX(5deg) rotateY(-5deg); box-shadow: var(--shadow-lift); }
   .skill-icon {
     width: 54px; height: 54px;
     border-radius: 16px;
@@ -569,7 +1069,7 @@
   .project-card.pc-1::before { background: var(--lavender-mid); }
   .project-card.pc-2::before { background: var(--sage-mid); }
   .project-card.pc-3::before { background: var(--blush-mid); }
-  .project-card:hover { transform: translateY(-10px) rotate(-1deg); box-shadow: var(--shadow-lift); }
+  .project-card:hover { transform: translateY(-10px) rotateX(6deg) rotateY(-6deg); box-shadow: var(--shadow-lift); }
   .project-card:hover::before { transform: scale(1.3); }
   .project-card > * { position: relative; z-index: 1; }
   .project-emoji { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
@@ -718,6 +1218,25 @@
     display: grid;
     gap: 1.1rem;
   }
+
+  .skill-card,
+  .project-card,
+  .tl-card,
+  .ach-card,
+  .edu-card,
+  .profile-card,
+  .contact-form {
+    box-shadow: var(--shadow-soft), 0 0 0 1px rgba(255, 255, 255, 0.28);
+  }
+  .skill-card:hover,
+  .project-card:hover,
+  .tl-card:hover,
+  .ach-card:hover,
+  .edu-card:hover,
+  .profile-card:hover,
+  .contact-form:hover {
+    box-shadow: var(--shadow-lift), 0 0 30px rgba(111, 152, 184, 0.18);
+  }
   .field label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--espresso-light); margin-bottom: 0.4rem; letter-spacing: 0.03em; }
   .field input, .field textarea {
     width: 100%;
@@ -809,6 +1328,12 @@
     .tl-card li { text-align: left; }
 
     .scroll-hint { display: none; }
+    .particle-canvas { opacity: 0.22; }
+    .geo-shape {
+      opacity: 0.35;
+      filter: drop-shadow(0 10px 18px rgba(18, 25, 35, 0.06));
+    }
+    .geo-shape.shape-1, .geo-shape.shape-6 { transform: none; }
   }
 
   /* ============ REDUCED MOTION ============ */
@@ -821,13 +1346,35 @@
     }
     .reveal { opacity: 1 !important; transform: none !important; }
     .blob { display: none; }
+    .ambient-field, .geo-field, .spotlight, .scroll-badge, .particle-canvas { display: none; }
   }
 </style>
 </head>
 <body>
 
+<div class="ambient-field" aria-hidden="true">
+  <span class="ambient-orb a1"></span>
+  <span class="ambient-orb a2"></span>
+  <span class="ambient-orb a3"></span>
+</div>
+
+<div class="geo-field" aria-hidden="true">
+  <div class="geo-shape shape-1"></div>
+  <div class="geo-shape shape-2"></div>
+  <div class="geo-shape shape-3"></div>
+  <div class="geo-shape shape-4"></div>
+  <div class="geo-shape shape-5"></div>
+  <div class="geo-shape shape-6"></div>
+</div>
+
+<canvas class="particle-canvas" id="particleCanvas" aria-hidden="true"></canvas>
+
+<div class="spotlight" aria-hidden="true"></div>
+
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
+
+<div class="scroll-badge" aria-hidden="true"><span class="scroll-pill"></span>Scroll</div>
 
 <!-- ============ NAVBAR ============ -->
 <nav id="nav">
@@ -837,11 +1384,12 @@
   </button>
   <ul class="nav-links" id="navLinks">
     <li><a href="#about">About</a></li>
+    <li><a href="#education">Education</a></li>
     <li><a href="#skills">Skills</a></li>
     <li><a href="#projects">Projects</a></li>
     <li><a href="#experience">Experience</a></li>
     <li><a href="#achievements">Achievements</a></li>
-    <li><a href="#contact" class="nav-cta">Say Hello 🌸</a></li>
+    <li><a href="#contact" class="nav-cta">Contact</a></li>
   </ul>
 </nav>
 
@@ -877,19 +1425,19 @@
     </p>
 
     <p class="hero-bio">
-      I'm adata science enthusiast who loves turning messy data into
+      I'm a data science enthusiast who loves turning messy data into
       clear insight — and building warm, useful products along the way. Math brain,
       curious heart. 🌿
     </p>
 
     <div class="hero-actions">
       <a href="#projects" class="btn-primary">See My Work <span class="btn-arrow">→</span></a>
-      <a href="#contact" class="btn-secondary">Say Hello 🌸</a>
+      <a href="#contact" class="btn-secondary">Contact Me</a>
     </div>
 
     <div class="stats">
       <div class="stat">
-        <span class="stat-num">8.69</span>
+        <span class="stat-num">8.5</span>
         <span class="stat-label">MCA CGPA</span>
       </div>
       <div class="stat-div"></div>
@@ -928,9 +1476,9 @@
 
       <p class="photo-caption">— that's me! 👋</p>
 
-      <div class="float-tag tag-1"><span class="tag-emoji">🤖</span> ML Enthusiast</div>
-      <div class="float-tag tag-2"><span class="tag-emoji">📊</span> Data Storyteller</div>
-      <div class="float-tag tag-3"><span class="tag-emoji">➗</span> Math Brain</div>
+      <div class="float-tag tag-1"><span class="tag-emoji">🤖</span> Machine Learning</div>
+      <div class="float-tag tag-2"><span class="tag-emoji">📊</span> Data Analytics</div>
+      <div class="float-tag tag-3"><span class="tag-emoji">➗</span> Quantitative Thinking</div>
     </div>
   </div>
 
@@ -950,8 +1498,15 @@
 
   <div class="about-grid">
     <div class="about-photo reveal">
-      <div class="about-blob">
-        <img src="./WhatsApp%20Image%202026-06-07%20at%2010.58.36%20AM.jpeg" alt="Antra Prakash" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+      <div class="profile-card">
+        <span class="profile-kicker">Professional summary</span>
+        <h3>Antra Prakash</h3>
+        <p class="profile-role">Data &amp; AI Enthusiast | MCA, KIET Group of Institutions</p>
+        <div class="profile-metrics">
+          <div><span>8.5</span><small>CGPA</small></div>
+          <div><span>3+</span><small>Internships</small></div>
+          <div><span>96%</span><small>Top Model Acc.</small></div>
+        </div>
       </div>
       <div class="float-tag tag-a"><span class="tag-emoji">🎓</span> MCA @ KIET</div>
       <div class="float-tag tag-b"><span class="tag-emoji">✨</span> Top 2% UCMAS</div>
@@ -962,7 +1517,7 @@
       <h2 class="section-title reveal d1">Math roots, <span class="accent">data wings.</span></h2>
       <p class="reveal d1">
         I'm Antra — I did <strong>Master of Computer Applications from KIET Group of Institutions with a stellar CGPA of
-        (8.69 CGPA)</strong> after a B.Sc. (Hons) in Mathematics from Delhi University. My math
+        (8.5 CGPA)</strong> after a B.Sc. (Hons) in Mathematics from Delhi University. My math
         background gives me a deep comfort with patterns and probability, and data science is
         where I get to put it to work.
       </p>
@@ -985,6 +1540,65 @@
         <div class="value-card vc-2"><span class="vc-emoji">🪶</span><h4>Clarity</h4><p>Make the complex feel simple.</p></div>
         <div class="value-card vc-3"><span class="vc-emoji">🎯</span><h4>Impact</h4><p>Build things that actually help.</p></div>
         <div class="value-card vc-4"><span class="vc-emoji">🌸</span><h4>Joy</h4><p>Good work can spark delight.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EDUCATION ============ -->
+<section id="education" class="section-pad">
+  <div class="blob-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+  <div class="education-orb orb-1"></div>
+  <div class="education-orb orb-2"></div>
+  <div class="education-orb orb-3"></div>
+
+  <div class="section-head">
+    <div class="reveal"><span class="eyebrow">Educational journey</span></div>
+    <h2 class="section-title reveal d1">My academic <span class="accent">foundation</span></h2>
+    <p class="section-sub reveal d1">The key milestones that shaped my analytical background and set the base for my work in data and AI.</p>
+  </div>
+
+  <div class="education-timeline">
+    <div class="edu-item reveal d1">
+      <span class="edu-dot"></span>
+      <div class="edu-card">
+        <span class="edu-year">Postgraduate</span>
+        <h3>Master of Computer Applications</h3>
+        <p class="edu-school">KIET Group of Institutions</p>
+        <p>Focused on application development, data systems, and practical computing skills. CGPA: 8.5.</p>
+      </div>
+    </div>
+
+    <div class="edu-item reveal d2">
+      <span class="edu-dot"></span>
+      <div class="edu-card">
+        <span class="edu-year">Undergraduate</span>
+        <h3>B.Sc. (Hons) in Mathematics</h3>
+        <p class="edu-school">University of Delhi</p>
+        <p>Built strong problem-solving and quantitative reasoning skills. CGPA: 6.7.</p>
+      </div>
+    </div>
+
+    <div class="edu-item reveal d3">
+      <span class="edu-dot"></span>
+      <div class="edu-card">
+        <span class="edu-year">Class XII</span>
+        <h3>Senior Secondary School</h3>
+        <p class="edu-school">Higher Secondary</p>
+        <p>Completed higher secondary education with 91.4%.</p>
+      </div>
+    </div>
+
+    <div class="edu-item reveal d4">
+      <span class="edu-dot"></span>
+      <div class="edu-card">
+        <span class="edu-year">Class X</span>
+        <h3>Secondary School</h3>
+        <p class="edu-school">Schooling</p>
+        <p>Completed secondary education with 91.3%.</p>
       </div>
     </div>
   </div>
@@ -1022,6 +1636,8 @@
         <span class="pill">Scikit-Learn</span><span class="pill">TensorFlow</span><span class="pill">Keras</span>
         <span class="pill">Pandas</span><span class="pill">NumPy</span><span class="pill">NLP</span>
         <span class="pill">Seaborn</span><span class="pill">Matplotlib</span><span class="pill">EDA</span>
+        <span class="pill">GenAI</span><span class="pill">Prompt Engineering</span><span class="pill">LLM Apps</span>
+        <span class="pill">RAG</span><span class="pill">Embeddings</span>
       </div>
     </div>
 
@@ -1269,6 +1885,32 @@
 </section>
 
 <script>
+  const root = document.documentElement;
+
+  /* ---------- Cursor spotlight ---------- */
+  window.addEventListener('pointermove', (event) => {
+    root.style.setProperty('--spot-x', `${(event.clientX / window.innerWidth) * 100}%`);
+    root.style.setProperty('--spot-y', `${(event.clientY / window.innerHeight) * 100}%`);
+    root.style.setProperty('--mouse-x', `${((event.clientX - window.innerWidth / 2) / window.innerWidth) * 16}px`);
+    root.style.setProperty('--mouse-y', `${((event.clientY - window.innerHeight / 2) / window.innerHeight) * 16}px`);
+  }, { passive: true });
+
+  /* ---------- Magnetic buttons ---------- */
+  const magneticTargets = document.querySelectorAll('.btn-primary, .btn-secondary, .nav-cta');
+  magneticTargets.forEach((target) => {
+    target.addEventListener('pointermove', (event) => {
+      const bounds = target.getBoundingClientRect();
+      const offsetX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 16;
+      const offsetY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 16;
+      target.style.setProperty('--mag-x', `${offsetX.toFixed(2)}px`);
+      target.style.setProperty('--mag-y', `${offsetY.toFixed(2)}px`);
+    });
+    target.addEventListener('pointerleave', () => {
+      target.style.setProperty('--mag-x', '0px');
+      target.style.setProperty('--mag-y', '0px');
+    });
+  });
+
   /* ---------- Custom cursor (pointer devices only) ---------- */
   const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   if (fine) {
@@ -1306,6 +1948,122 @@
   const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 30);
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ---------- Scroll-linked parallax ---------- */
+  const parallaxLayers = document.querySelectorAll('.blob-bg');
+  const geoShapes = document.querySelectorAll('.geo-shape');
+  const geoMotion = Array.from(geoShapes).map((shape, index) => ({
+    shape,
+    index,
+    speed: 0.025 + (index * 0.0045),
+    sway: 0.6 + (index * 0.18),
+    depth: 0.35 + (index * 0.08),
+    scale: 1 + (index % 3) * 0.01,
+  }));
+  let parallaxTicking = false;
+  const updateParallax = () => {
+    const scrollY = window.scrollY;
+    root.style.setProperty('--scroll-y', scrollY.toFixed(2));
+    parallaxLayers.forEach((layer, index) => {
+      const depth = 0.018 + (index * 0.004);
+      layer.style.transform = `translate3d(0, ${scrollY * depth}px, 0)`;
+    });
+    geoMotion.forEach(({ shape, index, speed }) => {
+      const drift = scrollY * speed;
+      shape.style.setProperty('--parallax-y', `${drift}px`);
+      shape.style.setProperty('--parallax-rot', `${scrollY * (0.002 + index * 0.0006)}deg`);
+    });
+    parallaxTicking = false;
+  };
+  window.addEventListener('scroll', () => {
+    if (!parallaxTicking) {
+      window.requestAnimationFrame(updateParallax);
+      parallaxTicking = true;
+    }
+  }, { passive: true });
+  updateParallax();
+
+  /* ---------- Soft particle field ---------- */
+  const particleCanvas = document.getElementById('particleCanvas');
+  const particleCtx = particleCanvas.getContext('2d', { alpha: true });
+  const particleReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const particles = [];
+  const particleCount = particleReduce ? 12 : (window.innerWidth < 768 ? 18 : 28);
+  let particleFrame = 0;
+
+  const resizeParticles = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    particleCanvas.width = Math.floor(window.innerWidth * dpr);
+    particleCanvas.height = Math.floor(window.innerHeight * dpr);
+    particleCanvas.style.width = window.innerWidth + 'px';
+    particleCanvas.style.height = window.innerHeight + 'px';
+    particleCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+
+  const makeParticle = () => ({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: 0.8 + Math.random() * 1.8,
+    vx: (Math.random() - 0.5) * 0.14,
+    vy: -0.08 - Math.random() * 0.22,
+    alpha: 0.08 + Math.random() * 0.22,
+    drift: Math.random() * Math.PI * 2,
+    hue: Math.random() > 0.5 ? '111, 152, 184' : '126, 157, 143',
+  });
+
+  const initParticles = () => {
+    particles.length = 0;
+    for (let index = 0; index < particleCount; index += 1) particles.push(makeParticle());
+  };
+
+  const drawParticles = (time) => {
+    if (!particleCtx) return;
+    particleCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    const elapsed = time * 0.001;
+    particles.forEach((particle, index) => {
+      particle.drift += 0.003 + index * 0.00008;
+      particle.x += particle.vx + Math.sin(elapsed * 0.5 + particle.drift) * 0.05;
+      particle.y += particle.vy;
+
+      if (particle.x < -40) particle.x = window.innerWidth + 40;
+      if (particle.x > window.innerWidth + 40) particle.x = -40;
+      if (particle.y < -40) particle.y = window.innerHeight + 40;
+
+      const glow = particleCtx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.r * 8);
+      glow.addColorStop(0, `rgba(${particle.hue}, ${particle.alpha})`);
+      glow.addColorStop(0.4, `rgba(${particle.hue}, ${particle.alpha * 0.45})`);
+      glow.addColorStop(1, 'rgba(255,255,255,0)');
+      particleCtx.fillStyle = glow;
+      particleCtx.beginPath();
+      particleCtx.arc(particle.x, particle.y, particle.r * (1 + Math.sin(elapsed + particle.drift) * 0.2), 0, Math.PI * 2);
+      particleCtx.fill();
+    });
+    particleFrame = requestAnimationFrame(drawParticles);
+  };
+
+  resizeParticles();
+  initParticles();
+  particleFrame = requestAnimationFrame(drawParticles);
+  window.addEventListener('resize', () => {
+    resizeParticles();
+    initParticles();
+  }, { passive: true });
+
+  let geoStart = performance.now();
+  const animateGeo = (time) => {
+    const elapsed = (time - geoStart) / 1000;
+    geoMotion.forEach(({ shape, index, sway, depth, scale }) => {
+      const phase = elapsed * (0.18 + index * 0.028) + index * 1.4;
+      const floatY = Math.sin(phase) * (10 + index * 2.2);
+      const floatRot = Math.cos(phase * 0.82) * (4 + index * 0.7);
+      const floatScale = scale + (Math.sin(phase * 0.6) * 0.015);
+      shape.style.setProperty('--float-y', `${floatY}px`);
+      shape.style.setProperty('--float-rot', `${floatRot}deg`);
+      shape.style.setProperty('--float-scale', floatScale.toFixed(3));
+    });
+    requestAnimationFrame(animateGeo);
+  };
+  requestAnimationFrame(animateGeo);
 
   /* ---------- Mobile menu toggle ---------- */
   const navToggle = document.getElementById('navToggle');
