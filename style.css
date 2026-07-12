@@ -348,9 +348,6 @@ nav.scrolled {
 .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
 .nav-toggle span { width: 24px; height: 2px; background: var(--espresso); border-radius: 2px; transition: transform 0.3s var(--ease), opacity 0.3s; }
 
-/* ============ SCALE WRAPPER (forces desktop alignment on phone) ============ */
-#scaleWrap { width: 100%; }
-
 /* ============ SHARED SECTION STYLES ============ */
 section { position: relative; overflow: hidden; perspective: 1400px; z-index: 1; }
 .section-pad { padding: 7rem 3rem; }
@@ -898,23 +895,103 @@ footer { margin-top: 6rem; background: var(--espresso); color: var(--cream); tex
 @keyframes popIn { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
 
 /* ============ RESPONSIVE ============ */
-/* ============ MOBILE = SAME LAYOUT AS DESKTOP ============
-   By request, phone and laptop show the identical arrangement — no
-   stacking, no hamburger menu, no font-size step-downs. #scaleWrap
-   (see script.js) renders the whole page at a fixed 1280px desktop
-   layout and uniformly scales it down to fit the real viewport width,
-   so every grid/column/alignment rule above applies unchanged on phones
-   too. What's left here is only for things intentionally OUTSIDE that
-   wrapper (the back-to-top button) or for cutting GPU cost on touch/
-   small devices without touching layout (see .reduce-fx below). */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; text-align: center; padding: 6.5rem 2rem 4rem; }
+  .hero-left { display: flex; flex-direction: column; align-items: center; }
+  .hero-bio { max-width: 560px; text-align: center; }
+  .hero-right { margin-top: 2.25rem; }
+  .stats { justify-content: center; flex-wrap: wrap; gap: 1rem 1.5rem; }
+  .stat-div { display: none; }
+  .photo-scene { width: min(100%, 320px); height: 380px; }
+  .photo-blob-wrap { width: min(100%, 280px); height: 320px; }
+  .scroll-hint { bottom: 1.5rem; }
+  .skills-grid { grid-template-columns: 1fr; }
+  .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .about-photo { min-height: auto; }
+  .values-row { gap: 0.9rem; }
+  .value-card { flex: 1 1 160px; }
+  .about-text p, .fun-facts { max-width: 100%; }
+  .contact-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+  .projects-grid, .ach-grid { grid-template-columns: 1fr; }
+}
 @media (max-width: 768px) {
+  .section-pad { padding: 4.5rem 1.25rem; }
+  nav, nav.scrolled { padding: 1rem 1.5rem; }
+  .nav-links {
+    position: fixed; top: 0; right: 0; height: 100vh; width: min(78vw, 320px); background: var(--cream);
+    flex-direction: column; align-items: flex-start; justify-content: center; gap: 1.8rem; padding: 3rem 2.5rem;
+    box-shadow: -10px 0 40px rgba(44, 26, 14, 0.12); transform: translateX(100%); transition: transform 0.4s var(--ease);
+  }
+  .nav-links.open { transform: translateX(0); }
+  .nav-links a { font-size: 1.1rem; }
+  .nav-toggle { display: flex; z-index: 101; }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .hero { grid-template-columns: 1fr; padding: 6rem 1.5rem 4rem; text-align: center; }
+  .hero-left { display: flex; flex-direction: column; align-items: center; }
+  .hero-bio { text-align: center; }
+  .hero-right { margin-top: 2.5rem; }
+  .stats { justify-content: center; gap: 0.9rem 1.1rem; }
+  .stat { min-width: 84px; }
+  .photo-scene { width: min(100%, 280px); height: 340px; }
+  .photo-blob-wrap { width: min(100%, 250px); height: 290px; }
+  .hello-badge { padding-inline: 14px; }
+  .hero-actions { justify-content: center; }
+  .hero-name { font-size: clamp(2.3rem, 10vw, 3.2rem); }
+  .hero-bio { font-size: 1rem; }
+  .section-head { margin-bottom: 2.5rem; }
+  .project-card, .skill-card, .contact-form, .edu-card, .tl-card, .ach-card, .profile-card { padding: 1.4rem; }
+  .skill-card h3, .project-card h3, .edu-card h3, .tl-card h3 { font-size: 1.15rem; }
+  .ach-card h3 { font-size: 1.4rem; }
+  .contact-form { gap: 0.95rem; }
+  footer { margin-top: 4.5rem; padding: 2.5rem 1.25rem 2rem; }
+  .education-timeline::before { left: 18px; }
+  .edu-item { width: 100%; left: 0 !important; padding: 0 0 2.2rem 3rem; text-align: left !important; }
+  .edu-dot { left: 9px !important; right: auto !important; }
+  .edu-card h3, .edu-card .edu-school, .edu-card p { text-align: left; }
+  .timeline::before { left: 18px; }
+  .tl-item { width: 100%; left: 0 !important; padding: 0 0 2.2rem 3rem; text-align: left !important; }
+  .tl-item .tl-dot { left: 9px !important; right: auto !important; }
+  .tl-card li { text-align: left; }
+  .scroll-hint { display: none; }
   .back-to-top { right: 0.9rem; bottom: 1rem; width: 42px; height: 42px; }
+}
+@media (max-width: 520px) {
+  nav, nav.scrolled { padding: 0.9rem 1rem; }
+  .nav-logo { font-size: 1.25rem; }
+  .nav-links { width: 100vw; padding: 2.75rem 1.5rem; }
+  .hero { padding: 5.5rem 1rem 3.5rem; }
+  .section-pad { padding: 4rem 1rem; }
+  .hello-badge { font-size: 0.74rem; gap: 6px; }
+  .hero-name { font-size: clamp(2rem, 11vw, 2.7rem); }
+  .hero-role { font-size: 1rem; gap: 8px; }
+  .hero-bio { line-height: 1.65; }
+  .hero-actions { width: 100%; }
+  .hero-actions a { width: 100%; justify-content: center; }
+  .stats { gap: 0.8rem; }
+  .stat { min-width: calc(50% - 0.4rem); align-items: center; text-align: center; }
+  .stat-num { font-size: 1.6rem; }
+  .photo-scene { width: min(100%, 250px); height: 310px; }
+  .photo-blob-wrap { width: min(100%, 220px); height: 250px; }
+  .photo-caption { font-size: 0.66rem; bottom: -2px; }
+  .float-tag { padding: 7px 12px; font-size: 0.7rem; }
+  .tag-1 { left: -10px; bottom: 64px; }
+  .tag-2 { right: -8px; top: 24px; }
+  .tag-3 { right: -4px; bottom: 8px; }
+  .about-photo .tag-a { right: 0; }
+  .about-photo .tag-b { left: 0; }
+  .values-row, .certs-row { gap: 0.7rem; }
+  .value-card { flex: 1 1 100%; }
+  .projects-grid, .skills-grid, .ach-grid { gap: 1rem; }
+  .project-card, .skill-card, .contact-form, .edu-card, .tl-card, .ach-card, .profile-card { border-radius: 22px; }
+  .field input, .field textarea { font-size: 0.92rem; }
+  .footer-links { gap: 1rem; }
 }
 
 /* ============ REDUCE-FX (performance) ============
    Toggled by script.js on narrow / coarse-pointer devices. Only touches
-   decorative cost (blur radius, particle/meteor counts) — never layout —
-   so it can't affect the forced desktop alignment above. */
+   decorative cost (blur radius, particle/meteor counts), never layout. */
 .reduce-fx .particle-canvas { opacity: 0.16; }
 .reduce-fx .meteor:nth-child(n+6) { display: none; }
 .reduce-fx .geo-shape { backdrop-filter: none; -webkit-backdrop-filter: none; opacity: 0.3; }

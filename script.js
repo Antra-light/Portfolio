@@ -7,38 +7,17 @@ if (window.lucide) lucide.createIcons();
 gsap.registerPlugin(ScrollTrigger);
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ---------- Force-desktop layout on phone (same alignment as laptop) ----------
-   #scaleWrap holds nav + every section. Below REF_WIDTH we fix its layout
-   width at REF_WIDTH and shrink it with CSS `zoom` rather than `transform`:
-   zoom actually resizes the real layout box (so native/Lenis scroll length
-   and ScrollTrigger positions stay correct automatically) and, unlike
-   transform, it does not create a new containing block — so nav's
-   position:fixed still anchors to the true viewport instead of to
-   #scaleWrap. Runs before ScrollTrigger/Lenis init so they measure the
-   already-corrected layout. */
-const REF_WIDTH = 1280;
-const scaleWrap = document.getElementById('scaleWrap');
-function applyScaleWrap() {
-  if (!scaleWrap) return;
-  const vw = window.innerWidth;
-  if (vw < REF_WIDTH) {
-    const scale = vw / REF_WIDTH;
-    scaleWrap.style.width = `${REF_WIDTH}px`;
-    scaleWrap.style.zoom = scale;
-    document.body.classList.add('reduce-fx');
-  } else {
-    scaleWrap.style.width = '';
-    scaleWrap.style.zoom = '';
-    document.body.classList.remove('reduce-fx');
-  }
-  if (window.ScrollTrigger) ScrollTrigger.refresh();
+/* ---------- Reduce decorative effects on narrow / touch devices (perf) ----------
+   Plain viewport-width + pointer-type check, no layout manipulation at all —
+   this replaces an earlier "zoom the whole desktop layout down to fit phones"
+   approach that was reverted (it made phone text unreadably small and its
+   recalculations were implicated in scroll/perf issues on real devices). */
+function applyReduceFx() {
+  const shouldReduce = window.innerWidth < 900 || window.matchMedia('(pointer: coarse)').matches;
+  document.body.classList.toggle('reduce-fx', shouldReduce);
 }
-applyScaleWrap();
-window.addEventListener('resize', applyScaleWrap);
-if (document.fonts) document.fonts.ready.then(applyScaleWrap);
-/* icons/images can still shift layout height slightly after first paint */
-setTimeout(applyScaleWrap, 400);
-setTimeout(applyScaleWrap, 1200);
+applyReduceFx();
+window.addEventListener('resize', applyReduceFx);
 
 /* ---------- Lenis smooth scroll, wired into GSAP's ticker ---------- */
 let lenis;
@@ -199,7 +178,7 @@ if (!prefersReducedMotion) {
 const particleCanvas = document.getElementById('particleCanvas');
 const particleCtx = particleCanvas.getContext('2d', { alpha: true });
 const particles = [];
-const lowPower = window.innerWidth < REF_WIDTH || window.matchMedia('(pointer: coarse)').matches;
+const lowPower = window.innerWidth < 900 || window.matchMedia('(pointer: coarse)').matches;
 const particleCount = prefersReducedMotion ? 8 : (lowPower ? 12 : 24);
 const spriteSize = 64;
 const sprites = {
@@ -324,36 +303,18 @@ if (!prefersReducedMotion) {
      first paint — the custom property updates correctly afterward, but
      "transform"/"opacity" silently stop recomputing from it. A display
      toggle forces the element's style to be thrown away and recomputed
-     from scratch, which reliably clears it. It's cheap and idempotent, so
-     it's fired through several redundant schedulers (rAF alone isn't
-     reliable — it can be throttled before the first paint) rather than
-     just once. */
-  const unstickTiltCards = () => {
+     from scratch, which clears it. This is a forced synchronous reflow
+     though (expensive), so it runs exactly once, shortly after first
+     paint — NOT repeatedly on scroll/pointer, which was costly enough on
+     real devices to be a likely cause of jank. */
+  requestAnimationFrame(() => {
     document.querySelectorAll('[data-tilt]').forEach((card) => {
       const prevDisplay = card.style.display;
       card.style.display = 'none';
       void card.offsetHeight;
       card.style.display = prevDisplay;
     });
-  };
-  unstickTiltCards();
-  requestAnimationFrame(unstickTiltCards);
-  setTimeout(unstickTiltCards, 0);
-  setTimeout(unstickTiltCards, 300);
-  window.addEventListener('load', unstickTiltCards, { once: true });
-  /* Belt-and-suspenders: also re-run on scroll (throttled), since a card
-     further down the page only needs unsticking once IT is about to be
-     revealed — a single one-off listener could fire too early (on the
-     first pixel of scroll) and not help a card revealed much later. */
-  let unstickThrottle = false;
-  window.addEventListener('scroll', () => {
-    if (unstickThrottle) return;
-    unstickThrottle = true;
-    setTimeout(() => { unstickTiltCards(); unstickThrottle = false; }, 250);
-  }, { passive: true });
-  ['pointermove', 'touchstart'].forEach((evt) =>
-    window.addEventListener(evt, unstickTiltCards, { once: true, passive: true })
-  );
+  });
 }
 
 /* ---------- Hero heading word-split reveal (GSAP, Framer-Motion-esque stagger) ---------- */
@@ -503,12 +464,21 @@ navToggle.addEventListener('click', () => {
 });
 navLinks.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeMenu));
 
-/* ---------- Scroll reset on load ---------- */
+/* ---------- Scroll reset on load ----------
+   Always land on the hero, never mid-page. Covers: the browser's own
+   scroll-position memory (back/forward, bfcache), and a URL that happens
+   to carry a leftover #section hash (which would otherwise make the
+   browser auto-jump straight to that section before any of our JS runs). */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (window.location.hash) {
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+}
 const resetScroll = () => {
   if (lenis) lenis.scrollTo(0, { immediate: true });
   else window.scrollTo(0, 0);
 };
+resetScroll();
+requestAnimationFrame(resetScroll);
 window.addEventListener('load', resetScroll, { once: true });
 window.addEventListener('pageshow', (event) => { if (event.persisted) resetScroll(); });
 

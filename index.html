@@ -55,13 +55,6 @@
   <i data-lucide="arrow-up"></i>
 </button>
 
-<!-- scaleWrap renders the whole content area (nav + all sections) at a
-     fixed desktop width and zooms it down to fit narrow viewports, so
-     phone shows the exact same alignment/columns as laptop instead of a
-     stacked mobile layout. CSS `zoom` (not `transform`) is used because
-     it resizes the real layout box, so scrolling and nav's
-     position:fixed both keep working normally. See script.js. -->
-<div id="scaleWrap">
 <!-- ============ NAVBAR ============ -->
 <nav id="nav">
   <a href="#home" class="nav-logo">Antra<span> P.</span></a>
@@ -594,7 +587,6 @@
     <p class="footer-copy">© 2026 Antra Prakash · Made with <span class="heart">♥</span> &amp; a lot of chai.</p>
   </footer>
 </section>
-</div><!-- /#scaleWrap -->
 
 <!-- Animation / effects libraries (CDN, static-site friendly) -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
