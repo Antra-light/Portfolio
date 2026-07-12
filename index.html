@@ -2189,9 +2189,9 @@
   navLinks.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeMenu));
 
   /* ---------- Reveal on scroll ---------- */
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const revealEls = document.querySelectorAll('.reveal');
-  if (reduce || !('IntersectionObserver' in window)) {
+  if (prefersReducedMotion || !('IntersectionObserver' in window)) {
     revealEls.forEach((el) => el.classList.add('in'));
   } else {
     const io = new IntersectionObserver((entries) => {
