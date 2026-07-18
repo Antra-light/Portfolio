@@ -183,7 +183,10 @@ a { color: inherit; }
 .bub-10 { width: 50px; height: 50px; top: 54%; left: 4%; --bubble-tint: rgba(126, 157, 143, 0.36); --bub-duration: 10.5s; --bub-tumble: 19s; animation-delay: -7s, -2s; }
 .bub-11 { width: 82px; height: 82px; bottom: 40%; left: 62%; --bubble-tint: rgba(128, 148, 184, 0.3); --bub-duration: 13.5s; --bub-tumble: 21s; animation-delay: -9s, -16s; }
 .bub-12 { width: 32px; height: 32px; top: 88%; right: 42%; --bubble-tint: rgba(228, 211, 173, 0.38); --bub-duration: 7.5s; --bub-tumble: 12s; animation-delay: -11s, -4s; }
-
+/* Cut back to 8 active bubbles (was 12) — each one is two permanently-
+   running animations, and that count had gone up purely for visual
+   density at the cost of real performance. */
+.bub-9, .bub-10, .bub-11, .bub-12 { display: none; }
 .geo-shape {
   position: absolute;
   transform-style: preserve-3d;
@@ -198,7 +201,7 @@ a { color: inherit; }
   width: 150px; height: 150px; top: 12%; right: 11%; border-radius: 28px;
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.55), rgba(111, 152, 184, 0.12));
   border: 1px solid rgba(255, 255, 255, 0.36);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 50px rgba(111, 152, 184, 0.10);
   --base-transform: rotateX(62deg) rotateY(-25deg) rotateZ(18deg);
 }
@@ -208,7 +211,7 @@ a { color: inherit; }
   clip-path: polygon(50% 0%, 88% 24%, 88% 76%, 50% 100%, 12% 76%, 12% 24%);
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(126, 157, 143, 0.14));
   border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 42px rgba(126, 157, 143, 0.10);
   --base-transform: rotateX(58deg) rotateY(28deg) rotateZ(-14deg);
 }
@@ -217,7 +220,7 @@ a { color: inherit; }
   width: 92px; height: 92px; bottom: 16%; right: 22%; border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), rgba(128, 148, 184, 0.16) 45%, rgba(128, 148, 184, 0.03) 72%);
   border: 1px solid rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 34px rgba(128, 148, 184, 0.12);
   --base-transform: rotateX(72deg) rotateY(-12deg) rotateZ(0deg);
 }
@@ -225,7 +228,7 @@ a { color: inherit; }
   width: 110px; height: 110px; top: 68%; left: 14%; border-radius: 32px;
   background: linear-gradient(145deg, rgba(255,255,255,0.42), rgba(111, 152, 184, 0.10));
   border: 1px solid rgba(255, 255, 255, 0.34);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.56), 0 0 36px rgba(111, 152, 184, 0.10);
   --base-transform: rotateX(68deg) rotateY(16deg) rotateZ(32deg);
 }
@@ -233,7 +236,7 @@ a { color: inherit; }
   width: 72px; height: 72px; top: 26%; left: 50%; border-radius: 24px;
   background: linear-gradient(155deg, rgba(255,255,255,0.56), rgba(126, 157, 143, 0.12));
   border: 1px solid rgba(255,255,255,0.38);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.58), 0 0 28px rgba(126, 157, 143, 0.10);
   --base-transform: rotateX(72deg) rotateY(-18deg) rotateZ(-18deg);
 }
@@ -242,7 +245,7 @@ a { color: inherit; }
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
   background: linear-gradient(145deg, rgba(255,255,255,0.42), rgba(128, 148, 184, 0.16));
   border: 1px solid rgba(255,255,255,0.32);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.56), 0 0 38px rgba(128, 148, 184, 0.10);
   --base-transform: rotateX(64deg) rotateY(20deg) rotateZ(12deg);
 }
@@ -315,7 +318,7 @@ nav {
 }
 nav.scrolled {
   background: rgba(246, 248, 251, 0.86);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 2px 24px rgba(44, 26, 14, 0.06);
   padding: 0.85rem 3rem;
 }
@@ -586,7 +589,7 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
   position: fixed; right: 1.2rem; top: 50%; transform: translateY(-50%); z-index: 20;
   display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.72);
   border: 1px solid rgba(18, 25, 35, 0.08); border-radius: 999px; padding: 10px 12px;
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: var(--shadow-soft);
   color: var(--espresso-light); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
   text-transform: uppercase; writing-mode: vertical-rl; text-orientation: mixed;
   animation: scrollFloat 4s ease-in-out infinite;
@@ -711,7 +714,7 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 .edu-item:nth-child(odd) .edu-dot { right: -9px; }
 .edu-item:nth-child(even) .edu-dot { left: -9px; border-color: var(--sage-deep); }
 .edu-card {
-  background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
   border-radius: 24px; padding: 1.7rem 1.8rem; box-shadow: var(--shadow-soft); border: 1px solid rgba(18, 25, 35, 0.06);
   transition: box-shadow 0.3s var(--ease), transform 0.55s var(--ease-bounce); transform-style: preserve-3d; position: relative; overflow: hidden; will-change: transform;
 }
@@ -729,7 +732,7 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 .skills-grid { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; }
 .skill-card {
   background: rgba(247, 249, 252, 0.72);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
   border-radius: 26px; padding: 2rem 1.8rem; box-shadow: var(--shadow-soft); border: 1px solid rgba(255, 255, 255, 0.45);
   transition: box-shadow 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.55s var(--ease-bounce); transform-style: preserve-3d; will-change: transform;
 }
@@ -753,7 +756,7 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 .project-card {
   position: relative;
   background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 28px; padding: 2.2rem; box-shadow: var(--shadow-soft); overflow: hidden;
   transition: box-shadow 0.4s var(--ease), transform 0.55s var(--ease-bounce); transform-style: preserve-3d; will-change: transform;
@@ -798,7 +801,7 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 .tl-item:nth-child(even) .tl-dot { left: -9px; border-color: var(--sage-deep); }
 .tl-card {
   background: rgba(247, 249, 252, 0.72);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
   border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 22px; padding: 1.6rem 1.8rem; box-shadow: var(--shadow-soft);
   transition: box-shadow 0.3s var(--ease), border-color 0.3s var(--ease);
@@ -853,7 +856,7 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 
 .contact-form {
   background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 28px; padding: 2.4rem; box-shadow: var(--shadow-lift); display: grid; gap: 1.1rem; will-change: transform;
 }

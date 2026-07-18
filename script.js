@@ -38,12 +38,33 @@ if (!prefersReducedMotion && window.Lenis) {
   });
 }
 
-/* ---------- Cursor spotlight ---------- */
+/* ---------- Cursor spotlight ----------
+   Perf fix: raw "pointermove" events can fire far more often than the
+   screen redraws (100+ times/sec on a lot of mice/trackpads — the
+   browser doesn't cap it to 60fps for you). Writing 4 custom properties
+   straight onto <html> on every single one of those events was forcing a
+   style recompute across everything that reads them (all 6 background
+   shapes' transforms + the full-screen spotlight gradient) way more
+   often than the screen could ever show it — pure wasted work, and a
+   likely source of the perceived lag. Now we just remember the latest
+   position and write it once per animation frame at most. */
+let pointerX = 0;
+let pointerY = 0;
+let spotlightQueued = false;
+function flushSpotlight() {
+  spotlightQueued = false;
+  root.style.setProperty('--spot-x', `${(pointerX / window.innerWidth) * 100}%`);
+  root.style.setProperty('--spot-y', `${(pointerY / window.innerHeight) * 100}%`);
+  root.style.setProperty('--mouse-x', `${((pointerX - window.innerWidth / 2) / window.innerWidth) * 16}px`);
+  root.style.setProperty('--mouse-y', `${((pointerY - window.innerHeight / 2) / window.innerHeight) * 16}px`);
+}
 window.addEventListener('pointermove', (event) => {
-  root.style.setProperty('--spot-x', `${(event.clientX / window.innerWidth) * 100}%`);
-  root.style.setProperty('--spot-y', `${(event.clientY / window.innerHeight) * 100}%`);
-  root.style.setProperty('--mouse-x', `${((event.clientX - window.innerWidth / 2) / window.innerWidth) * 16}px`);
-  root.style.setProperty('--mouse-y', `${((event.clientY - window.innerHeight / 2) / window.innerHeight) * 16}px`);
+  pointerX = event.clientX;
+  pointerY = event.clientY;
+  if (!spotlightQueued) {
+    spotlightQueued = true;
+    requestAnimationFrame(flushSpotlight);
+  }
 }, { passive: true });
 
 /* ---------- Magnetic buttons (GSAP quickTo for smoothness) ---------- */
@@ -146,27 +167,13 @@ if (!prefersReducedMotion) {
       ease: 'sine.inOut',
       delay: phaseOffset * 0.3,
     });
-    /* Continuous 3D tumble — these shapes already sit in 3D (each has a
-       fixed rotateX/rotateY "base" pose), this gently rocks them around
-       that pose over time so the background actually reads as animating
-       in 3D, not just drifting/spinning flat on the Z axis. */
-    gsap.to(shape, {
-      '--float-rx': `${8 + index * 1.6}deg`,
-      duration: 5 + index * 0.6,
-      repeat: -1,
-      yoyo: true,
-      ease: 'sine.inOut',
-      delay: phaseOffset * 0.2,
-    });
-    gsap.to(shape, {
-      '--float-ry': `${-10 - index * 1.4}deg`,
-      duration: 6.5 + index * 0.5,
-      repeat: -1,
-      yoyo: true,
-      ease: 'sine.inOut',
-      delay: phaseOffset * 0.4,
-    });
   });
+  /* The "3D tumble" (extra rotateX/rotateY oscillation on top of the float
+     above) was removed here — it was 12 more GSAP tweens ticking forever
+     in the background regardless of scroll position or visibility, on
+     top of everything else already running, and was a real contributor
+     to the lag. The shapes still float and rotate on Z; they just don't
+     also tumble in X/Y anymore. */
 }
 
 /* ---------- Soft particle field (canvas) ----------
@@ -247,7 +254,7 @@ window.addEventListener('resize', () => { resizeParticles(); initParticles(); },
 /* ---------- Meteors (Magic UI-style) ---------- */
 const meteorField = document.getElementById('meteorField');
 if (meteorField && !prefersReducedMotion) {
-  const meteorCount = 26;
+  const meteorCount = 14;
   for (let i = 0; i < meteorCount; i += 1) {
     const m = document.createElement('span');
     m.className = 'meteor';
