@@ -187,6 +187,7 @@ a { color: inherit; }
    running animations, and that count had gone up purely for visual
    density at the cost of real performance. */
 .bub-9, .bub-10, .bub-11, .bub-12 { display: none; }
+
 .geo-shape {
   position: absolute;
   transform-style: preserve-3d;
@@ -201,7 +202,7 @@ a { color: inherit; }
   width: 150px; height: 150px; top: 12%; right: 11%; border-radius: 28px;
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.55), rgba(111, 152, 184, 0.12));
   border: 1px solid rgba(255, 255, 255, 0.36);
-  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+  /* backdrop-filter removed: this shape is position:fixed, covers the whole page, and is animated forever - blurring a constantly-changing backdrop every frame was a major perf cost */
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 50px rgba(111, 152, 184, 0.10);
   --base-transform: rotateX(62deg) rotateY(-25deg) rotateZ(18deg);
 }
@@ -211,7 +212,7 @@ a { color: inherit; }
   clip-path: polygon(50% 0%, 88% 24%, 88% 76%, 50% 100%, 12% 76%, 12% 24%);
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(126, 157, 143, 0.14));
   border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  /* backdrop-filter removed - see shape-1 comment */
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 42px rgba(126, 157, 143, 0.10);
   --base-transform: rotateX(58deg) rotateY(28deg) rotateZ(-14deg);
 }
@@ -220,7 +221,7 @@ a { color: inherit; }
   width: 92px; height: 92px; bottom: 16%; right: 22%; border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), rgba(128, 148, 184, 0.16) 45%, rgba(128, 148, 184, 0.03) 72%);
   border: 1px solid rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+  /* backdrop-filter removed - see shape-1 comment */
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 34px rgba(128, 148, 184, 0.12);
   --base-transform: rotateX(72deg) rotateY(-12deg) rotateZ(0deg);
 }
@@ -228,7 +229,7 @@ a { color: inherit; }
   width: 110px; height: 110px; top: 68%; left: 14%; border-radius: 32px;
   background: linear-gradient(145deg, rgba(255,255,255,0.42), rgba(111, 152, 184, 0.10));
   border: 1px solid rgba(255, 255, 255, 0.34);
-  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+  /* backdrop-filter removed - see shape-1 comment */
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.56), 0 0 36px rgba(111, 152, 184, 0.10);
   --base-transform: rotateX(68deg) rotateY(16deg) rotateZ(32deg);
 }
@@ -236,7 +237,7 @@ a { color: inherit; }
   width: 72px; height: 72px; top: 26%; left: 50%; border-radius: 24px;
   background: linear-gradient(155deg, rgba(255,255,255,0.56), rgba(126, 157, 143, 0.12));
   border: 1px solid rgba(255,255,255,0.38);
-  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+  /* backdrop-filter removed - see shape-1 comment */
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.58), 0 0 28px rgba(126, 157, 143, 0.10);
   --base-transform: rotateX(72deg) rotateY(-18deg) rotateZ(-18deg);
 }
@@ -245,7 +246,7 @@ a { color: inherit; }
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
   background: linear-gradient(145deg, rgba(255,255,255,0.42), rgba(128, 148, 184, 0.16));
   border: 1px solid rgba(255,255,255,0.32);
-  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+  /* backdrop-filter removed - see shape-1 comment */
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.56), 0 0 38px rgba(128, 148, 184, 0.10);
   --base-transform: rotateX(64deg) rotateY(20deg) rotateZ(12deg);
 }
@@ -317,8 +318,12 @@ nav {
   transition: background 0.35s var(--ease), box-shadow 0.35s var(--ease), padding 0.35s var(--ease);
 }
 nav.scrolled {
-  background: rgba(246, 248, 251, 0.86);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  /* backdrop-filter removed: a fixed full-width-page canvas (.particle-canvas)
+     redraws every single frame forever, sitting behind everything — any
+     backdrop-filter anywhere on the page has to keep re-blurring that
+     constantly-changing content, all the time, regardless of user activity.
+     Bumped the opacity up a little to keep a similar frosted look without it. */
+  background: rgba(246, 248, 251, 0.94);
   box-shadow: 0 2px 24px rgba(44, 26, 14, 0.06);
   padding: 0.85rem 3rem;
 }
@@ -586,10 +591,14 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 .scroll-line { width: 1.5px; height: 40px; background: linear-gradient(to bottom, var(--blush-mid), transparent); animation: scrollPulse 2s ease infinite; }
 @keyframes scrollPulse { 0% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(0.3); transform-origin: top; } }
 .scroll-badge {
+  /* backdrop-filter removed: this badge is position:fixed AND runs a
+     perpetual scrollFloat animation forever — the exact same "always
+     moving + always blurred" combination that made the background
+     shapes so expensive. Bumped opacity up to compensate visually. */
   position: fixed; right: 1.2rem; top: 50%; transform: translateY(-50%); z-index: 20;
-  display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.72);
+  display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9);
   border: 1px solid rgba(18, 25, 35, 0.08); border-radius: 999px; padding: 10px 12px;
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-soft);
   color: var(--espresso-light); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
   text-transform: uppercase; writing-mode: vertical-rl; text-orientation: mixed;
   animation: scrollFloat 4s ease-in-out infinite;
@@ -714,7 +723,8 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 .edu-item:nth-child(odd) .edu-dot { right: -9px; }
 .edu-item:nth-child(even) .edu-dot { left: -9px; border-color: var(--sage-deep); }
 .edu-card {
-  background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+  /* backdrop-filter removed (see the .particle-canvas note near nav.scrolled) — bumped opacity to compensate */
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 24px; padding: 1.7rem 1.8rem; box-shadow: var(--shadow-soft); border: 1px solid rgba(18, 25, 35, 0.06);
   transition: box-shadow 0.3s var(--ease), transform 0.55s var(--ease-bounce); transform-style: preserve-3d; position: relative; overflow: hidden; will-change: transform;
 }
@@ -731,8 +741,8 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 #skills .blob-2 { width: 280px; height: 280px; background: var(--sky); bottom: -40px; left: 10%; }
 .skills-grid { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; }
 .skill-card {
-  background: rgba(247, 249, 252, 0.72);
-  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+  /* backdrop-filter removed (see the .particle-canvas note near nav.scrolled) — bumped opacity to compensate */
+  background: rgba(247, 249, 252, 0.92);
   border-radius: 26px; padding: 2rem 1.8rem; box-shadow: var(--shadow-soft); border: 1px solid rgba(255, 255, 255, 0.45);
   transition: box-shadow 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.55s var(--ease-bounce); transform-style: preserve-3d; will-change: transform;
 }
@@ -754,9 +764,9 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 #projects .blob-2 { width: 300px; height: 300px; background: var(--blush); bottom: 0; left: -60px; }
 .projects-grid { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
 .project-card {
+  /* backdrop-filter removed (see the .particle-canvas note near nav.scrolled) — bumped opacity to compensate */
   position: relative;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 28px; padding: 2.2rem; box-shadow: var(--shadow-soft); overflow: hidden;
   transition: box-shadow 0.4s var(--ease), transform 0.55s var(--ease-bounce); transform-style: preserve-3d; will-change: transform;
@@ -800,8 +810,8 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 .tl-item:nth-child(odd) .tl-dot { right: -9px; }
 .tl-item:nth-child(even) .tl-dot { left: -9px; border-color: var(--sage-deep); }
 .tl-card {
-  background: rgba(247, 249, 252, 0.72);
-  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+  /* backdrop-filter removed (see the .particle-canvas note near nav.scrolled) — bumped opacity to compensate */
+  background: rgba(247, 249, 252, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 22px; padding: 1.6rem 1.8rem; box-shadow: var(--shadow-soft);
   transition: box-shadow 0.3s var(--ease), border-color 0.3s var(--ease);
@@ -822,7 +832,8 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 #achievements .eyebrow, #achievements .section-title .accent { color: var(--lavender-deep); }
 .ach-grid { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.6rem; }
 .ach-card {
-  background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  /* backdrop-filter removed (see the .particle-canvas note near nav.scrolled) — bumped opacity to compensate */
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 26px; padding: 2rem; box-shadow: 0 8px 30px rgba(44, 26, 14, 0.08); border: 1px solid rgba(255, 255, 255, 0.6);
   transition: box-shadow 0.3s var(--ease), transform 0.55s var(--ease-bounce); display: flex; gap: 1.2rem; align-items: flex-start; will-change: transform;
 }
@@ -855,8 +866,8 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 .contact-socials a:is(:hover, :active) .social-ico { background: var(--blush-mid); }
 
 .contact-form {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+  /* backdrop-filter removed (see the .particle-canvas note near nav.scrolled) — bumped opacity to compensate */
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 28px; padding: 2.4rem; box-shadow: var(--shadow-lift); display: grid; gap: 1.1rem; will-change: transform;
 }
@@ -994,16 +1005,14 @@ footer { margin-top: 6rem; background: var(--espresso); color: var(--cream); tex
 
 /* ============ REDUCE-FX (performance) ============
    Toggled by script.js on narrow / coarse-pointer devices. Only touches
-   decorative cost (blur radius, particle/meteor counts), never layout. */
+   decorative cost (particle/meteor counts), never layout. The old rules
+   here that re-added backdrop-filter blur for "reduced" mode are gone —
+   backdrop-filter has been removed everywhere now, on every device, not
+   just narrow ones (see the comments where each declaration used to be). */
 .reduce-fx .particle-canvas { opacity: 0.16; }
 .reduce-fx .meteor:nth-child(n+6) { display: none; }
-.reduce-fx .geo-shape { backdrop-filter: none; -webkit-backdrop-filter: none; opacity: 0.3; }
+.reduce-fx .geo-shape { opacity: 0.3; }
 .reduce-fx .education-orb::before { filter: blur(8px); }
-.reduce-fx nav.scrolled { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-.reduce-fx .project-card, .reduce-fx .skill-card, .reduce-fx .tl-card, .reduce-fx .contact-form,
-.reduce-fx .edu-card, .reduce-fx .ach-card {
-  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-}
 .reduce-fx .photo-blob-bg { animation: morphBlob 8s ease-in-out infinite; }
 .reduce-fx .bubble:nth-child(n+4) { display: none; }
 

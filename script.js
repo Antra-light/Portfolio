@@ -149,6 +149,18 @@ document.querySelectorAll('.blob-bg').forEach((layer, index) => {
   });
 });
 
+/* These 6 shapes are position:fixed — they sit on top of the ENTIRE page,
+   always, at every scroll position. They used to also have
+   backdrop-filter: blur() (removed in style.css) *and* run a "float"
+   animation forever via repeat:-1/yoyo:true, with no pause, ever — not
+   tied to scroll, not tied to mouse activity, not tied to whether the tab
+   even had focus. A blurred layer that never stops moving, covering the
+   whole page, forces the browser to re-blur whatever's behind it on
+   every single frame, forever. That combination (fixed + always-blurred
+   + always-animating) was almost certainly the single biggest cause of
+   the lag. Now they only move in response to actual scrolling (the
+   scrub tween below), so they're completely idle — zero ongoing cost —
+   whenever the page isn't being scrolled. */
 const geoMotion = Array.from(document.querySelectorAll('.geo-shape')).map((shape, index) => ({ shape, index }));
 if (!prefersReducedMotion) {
   geoMotion.forEach(({ shape, index }) => {
@@ -157,23 +169,7 @@ if (!prefersReducedMotion) {
       ease: 'none',
       scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.8 },
     });
-    const phaseOffset = index * 1.4;
-    gsap.to(shape, {
-      '--float-y': `${10 + index * 2.2}px`,
-      '--float-rot': `${4 + index * 0.7}deg`,
-      duration: 2.4 + index * 0.3,
-      repeat: -1,
-      yoyo: true,
-      ease: 'sine.inOut',
-      delay: phaseOffset * 0.3,
-    });
   });
-  /* The "3D tumble" (extra rotateX/rotateY oscillation on top of the float
-     above) was removed here — it was 12 more GSAP tweens ticking forever
-     in the background regardless of scroll position or visibility, on
-     top of everything else already running, and was a real contributor
-     to the lag. The shapes still float and rotate on Z; they just don't
-     also tumble in X/Y anymore. */
 }
 
 /* ---------- Soft particle field (canvas) ----------
