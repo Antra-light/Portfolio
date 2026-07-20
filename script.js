@@ -1,5 +1,3 @@
-const root = document.documentElement;
-
 /* ---------- Lucide icons ---------- */
 if (window.lucide) lucide.createIcons();
 
@@ -39,24 +37,40 @@ if (!prefersReducedMotion && window.Lenis) {
 }
 
 /* ---------- Cursor spotlight ----------
-   Perf fix: raw "pointermove" events can fire far more often than the
-   screen redraws (100+ times/sec on a lot of mice/trackpads — the
-   browser doesn't cap it to 60fps for you). Writing 4 custom properties
-   straight onto <html> on every single one of those events was forcing a
-   style recompute across everything that reads them (all 6 background
-   shapes' transforms + the full-screen spotlight gradient) way more
-   often than the screen could ever show it — pure wasted work, and a
-   likely source of the perceived lag. Now we just remember the latest
-   position and write it once per animation frame at most. */
+   Perf fix, round 2: throttling the writes to once-per-frame (done
+   earlier) wasn't the whole story. These 4 custom properties were being
+   written onto <html> — the ancestor of literally every element on the
+   page. Custom properties inherit down the tree, and a lot of browser
+   engines can't always tell in advance which descendants actually use a
+   given var(), so changing one on a very high-level ancestor can force a
+   style recheck across large swaths of the document, not just the small
+   number of elements that actually read it. A Performance-tab recording
+   confirmed "Rendering" (style recalc + layout) was the dominant cost on
+   this page, well ahead of Scripting — this is exactly the kind of thing
+   that causes that. --spot-x/--spot-y are only ever read by .spotlight
+   (one element) and --mouse-x/--mouse-y only by the 6 shapes inside
+   .geo-field — so now they're written directly onto those two elements
+   instead of <html>, shrinking the invalidation blast radius from "the
+   whole page" to "the 7 elements that actually care." */
+const spotlightEl = document.querySelector('.spotlight');
+const geoFieldEl = document.querySelector('.geo-field');
 let pointerX = 0;
 let pointerY = 0;
 let spotlightQueued = false;
 function flushSpotlight() {
   spotlightQueued = false;
-  root.style.setProperty('--spot-x', `${(pointerX / window.innerWidth) * 100}%`);
-  root.style.setProperty('--spot-y', `${(pointerY / window.innerHeight) * 100}%`);
-  root.style.setProperty('--mouse-x', `${((pointerX - window.innerWidth / 2) / window.innerWidth) * 16}px`);
-  root.style.setProperty('--mouse-y', `${((pointerY - window.innerHeight / 2) / window.innerHeight) * 16}px`);
+  const spotXPct = `${(pointerX / window.innerWidth) * 100}%`;
+  const spotYPct = `${(pointerY / window.innerHeight) * 100}%`;
+  const mouseXPx = `${((pointerX - window.innerWidth / 2) / window.innerWidth) * 16}px`;
+  const mouseYPx = `${((pointerY - window.innerHeight / 2) / window.innerHeight) * 16}px`;
+  if (spotlightEl) {
+    spotlightEl.style.setProperty('--spot-x', spotXPct);
+    spotlightEl.style.setProperty('--spot-y', spotYPct);
+  }
+  if (geoFieldEl) {
+    geoFieldEl.style.setProperty('--mouse-x', mouseXPx);
+    geoFieldEl.style.setProperty('--mouse-y', mouseYPx);
+  }
 }
 window.addEventListener('pointermove', (event) => {
   pointerX = event.clientX;
@@ -140,14 +154,14 @@ backToTop.addEventListener('click', () => {
   if (lenis) lenis.scrollTo(0); else window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-/* ---------- Scroll-linked parallax for blobs & geo shapes (GSAP) ---------- */
-document.querySelectorAll('.blob-bg').forEach((layer, index) => {
-  gsap.to(layer, {
-    y: () => window.innerHeight * (0.05 + index * 0.01),
-    ease: 'none',
-    scrollTrigger: { trigger: layer.closest('section'), start: 'top bottom', end: 'bottom top', scrub: 0.6 },
-  });
-});
+/* The per-section background-blob scroll parallax (9 separate scroll-linked
+   tweens, one per section) was removed here. A Performance-tab recording
+   showed "Rendering" (style recalc + layout) as by far the dominant cost —
+   nearly 4x Scripting — meaning the actual bottleneck was style/layout
+   work triggered continuously during scroll, not JS execution time. This
+   was one of two sources of that (see the geo-shape note below for the
+   other): 9 more elements recalculating "transform" on every scroll tick,
+   for an effect subtle enough not to be worth that cost. */
 
 /* These 6 shapes are position:fixed — they sit on top of the ENTIRE page,
    always, at every scroll position. They used to also have
@@ -325,6 +339,7 @@ interactiveCards.forEach((card) => {
 });
 
 if (!prefersReducedMotion) {
+
   /* Defensive fix: on first paint, some browsers cache a stale computed
      style for elements whose "transform"/"opacity" depend on a CSS custom
      property (--trx/--try here) and were already opacity:0 at that very
