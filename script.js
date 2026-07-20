@@ -264,42 +264,67 @@ if (meteorField && !prefersReducedMotion) {
   }
 }
 
-/* ---------- Spotlight cards: track cursor position per card ---------- */
-document.querySelectorAll('.value-card, .skill-card, .project-card, .tl-card, .ach-card, .edu-card, .profile-card, .contact-form')
-  .forEach((card) => {
-    card.addEventListener('pointermove', (e) => {
-      const bounds = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - bounds.left}px`);
-      card.style.setProperty('--my', `${e.clientY - bounds.top}px`);
-    });
-  });
+/* ---------- Spotlight glow + 3D tilt: ONE handler per card ----------
+   These used to be two completely separate pointermove listeners on the
+   same card (one for the spotlight glow, one for the tilt), each calling
+   getBoundingClientRect() independently and writing styles immediately,
+   on every single raw mouse-move event. getBoundingClientRect() is a
+   layout-measuring call — doing it twice, unthrottled, for every pixel
+   of mouse movement over a card is exactly the kind of thing that causes
+   hover stutter. Now there's one listener per card: it reads bounds
+   once, and (like the global spotlight fix above) only actually writes
+   to the DOM once per animation frame, no matter how many raw events
+   fired in between. */
+const tiltStrengthByEl = new WeakMap();
+document.querySelectorAll('[data-tilt]').forEach((card) => tiltStrengthByEl.set(card, 9));
+const photoTiltEl = document.getElementById('photoTilt');
+if (photoTiltEl) tiltStrengthByEl.set(photoTiltEl, 14);
 
-/* ---------- Mouse-driven 3D tilt (Aceternity-card style) ----------
-   Plain CSS custom-property + transition, deliberately NOT run through GSAP:
-   these cards already get a separate GSAP opacity tween for scroll-reveal,
-   and GSAP's transform cache doesn't compose cleanly with a second GSAP
-   tween on the same element's transform. A CSS transition sidesteps that
-   entirely and is just as smooth. */
-if (!prefersReducedMotion) {
-  const wireTilt = (el, strength) => {
-    el.addEventListener('pointermove', (e) => {
-      const bounds = el.getBoundingClientRect();
-      const px = (e.clientX - bounds.left) / bounds.width - 0.5;
-      const py = (e.clientY - bounds.top) / bounds.height - 0.5;
-      el.style.setProperty('--trx', `${(py * -strength).toFixed(2)}deg`);
-      el.style.setProperty('--try', `${(px * strength).toFixed(2)}deg`);
-    });
-    el.addEventListener('pointerleave', () => {
-      el.style.setProperty('--trx', '0deg');
-      el.style.setProperty('--try', '0deg');
-    });
+const spotlightCardSelector = '.value-card, .skill-card, .project-card, .tl-card, .ach-card, .edu-card, .profile-card, .contact-form';
+const interactiveCards = new Set([
+  ...document.querySelectorAll(spotlightCardSelector),
+  ...document.querySelectorAll('[data-tilt]'),
+]);
+if (photoTiltEl) interactiveCards.add(photoTiltEl);
+
+interactiveCards.forEach((card) => {
+  const doSpotlight = card.matches(spotlightCardSelector);
+  const tiltStrength = tiltStrengthByEl.get(card);
+  let pendingEvent = null;
+  let queued = false;
+
+  const flush = () => {
+    queued = false;
+    if (!pendingEvent) return;
+    const bounds = card.getBoundingClientRect();
+    if (doSpotlight) {
+      card.style.setProperty('--mx', `${pendingEvent.clientX - bounds.left}px`);
+      card.style.setProperty('--my', `${pendingEvent.clientY - bounds.top}px`);
+    }
+    if (tiltStrength && !prefersReducedMotion) {
+      const px = (pendingEvent.clientX - bounds.left) / bounds.width - 0.5;
+      const py = (pendingEvent.clientY - bounds.top) / bounds.height - 0.5;
+      card.style.setProperty('--trx', `${(py * -tiltStrength).toFixed(2)}deg`);
+      card.style.setProperty('--try', `${(px * tiltStrength).toFixed(2)}deg`);
+    }
   };
 
-  document.querySelectorAll('[data-tilt]').forEach((card) => wireTilt(card, 9));
+  card.addEventListener('pointermove', (e) => {
+    pendingEvent = e;
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(flush);
+    }
+  });
+  if (tiltStrength && !prefersReducedMotion) {
+    card.addEventListener('pointerleave', () => {
+      card.style.setProperty('--trx', '0deg');
+      card.style.setProperty('--try', '0deg');
+    });
+  }
+});
 
-  const photoTilt = document.getElementById('photoTilt');
-  if (photoTilt) wireTilt(photoTilt, 14);
-
+if (!prefersReducedMotion) {
   /* Defensive fix: on first paint, some browsers cache a stale computed
      style for elements whose "transform"/"opacity" depend on a CSS custom
      property (--trx/--try here) and were already opacity:0 at that very
