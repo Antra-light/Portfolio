@@ -153,7 +153,101 @@ ScrollTrigger.create({
 backToTop.addEventListener('click', () => {
   if (lenis) lenis.scrollTo(0); else window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+/* ---------- Scroll indicators (hero hint + fixed side badge) ---------- */
+const scrollHint = document.getElementById('scrollHint');
+if (scrollHint) {
+  scrollHint.addEventListener('click', () => {
+    const target = document.getElementById('about');
+    if (!target) return;
+    if (lenis) lenis.scrollTo(target, { offset: -70 });
+    else target.scrollIntoView({ behavior: 'smooth' });
+  });
+}
 
+/* ---------- Scroll badge: draggable progress dot + click-to-advance ----------
+   The dot tracks real scroll position (0 = top, 1 = bottom) whenever it's
+   not being dragged. Press-and-hold the dot itself and drag up/down to
+   scroll the page directly — the page follows your hand 1:1, like an
+   actual scrollbar thumb. A plain click anywhere else on the badge (no
+   drag) just jumps to the next section. */
+const scrollBadge = document.getElementById('scrollBadge');
+const scrollProgressDot = document.getElementById('scrollProgressDot');
+const scrollTrackEl = scrollBadge ? scrollBadge.querySelector('.scroll-track') : null;
+
+if (scrollBadge && scrollProgressDot && scrollTrackEl) {
+  const sectionIds = ['home', 'about', 'education', 'skills', 'projects', 'experience', 'achievements', 'contact'];
+  const sectionEls = sectionIds.map((id) => document.getElementById(id)).filter(Boolean);
+
+  let dragging = false;
+  let dragMoved = false;
+
+  const setDot = (progress) => {
+    scrollProgressDot.style.top = `${progress * 100}%`;
+  };
+
+  ScrollTrigger.create({
+    trigger: document.body,
+    start: 'top top',
+    end: 'bottom bottom',
+    onUpdate: (self) => {
+      if (!dragging) setDot(self.progress);
+    },
+  });
+
+  const progressFromClientY = (clientY) => {
+    const rect = scrollTrackEl.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (clientY - rect.top) / rect.height));
+  };
+
+  const scrollToProgress = (progress) => {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const y = progress * maxScroll;
+    if (lenis) lenis.scrollTo(y, { immediate: true });
+    else window.scrollTo(0, y);
+  };
+
+  scrollProgressDot.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    dragMoved = false;
+    scrollProgressDot.classList.add('dragging');
+    scrollProgressDot.setPointerCapture(e.pointerId);
+    e.stopPropagation();
+    e.preventDefault();
+  });
+
+  scrollProgressDot.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    dragMoved = true;
+    const progress = progressFromClientY(e.clientY);
+    setDot(progress);
+    scrollToProgress(progress);
+  });
+
+  const endDrag = (e) => {
+    if (!dragging) return;
+    dragging = false;
+    scrollProgressDot.classList.remove('dragging');
+    if (scrollProgressDot.hasPointerCapture(e.pointerId)) {
+      scrollProgressDot.releasePointerCapture(e.pointerId);
+    }
+  };
+  scrollProgressDot.addEventListener('pointerup', endDrag);
+  scrollProgressDot.addEventListener('pointercancel', endDrag);
+
+  scrollBadge.addEventListener('click', () => {
+    if (dragMoved) {
+      dragMoved = false;
+      return;
+    }
+    const scrollY = window.scrollY + 80;
+    let next = sectionEls[0];
+    for (const el of sectionEls) {
+      if (el.offsetTop > scrollY) { next = el; break; }
+    }
+    if (lenis) lenis.scrollTo(next, { offset: -70 });
+    else next.scrollIntoView({ behavior: 'smooth' });
+  });
+}
 /* The per-section background-blob scroll parallax (9 separate scroll-linked
    tweens, one per section) was removed here. A Performance-tab recording
    showed "Rendering" (style recalc + layout) as by far the dominant cost —

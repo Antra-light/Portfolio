@@ -49,8 +49,10 @@
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
-<div class="scroll-badge" aria-hidden="true"><span class="scroll-pill"></span>Scroll</div>
-
+<button class="scroll-badge" id="scrollBadge" type="button" aria-label="Scroll to next section">
+  <span class="scroll-track" aria-hidden="true"><span class="scroll-pill" id="scrollProgressDot"></span></span>
+  <span class="scroll-label">Scroll</span>
+</button>
 <button class="back-to-top" id="backToTop" aria-label="Back to top">
   <i data-lucide="arrow-up"></i>
 </button>
@@ -189,10 +191,10 @@
     </div>
   </div>
 
-  <div class="scroll-hint">
-    <span>Scroll</span>
-    <div class="scroll-line"></div>
-  </div>
+  <button class="scroll-hint" id="scrollHint" type="button" aria-label="Scroll to About section">
+  <span>Scroll</span>
+  <div class="scroll-line"></div>
+</button>
 </section>
 
 <!-- ============ ABOUT ============ -->
@@ -555,7 +557,7 @@
       </div>
     </div>
 
-    <form class="contact-form reveal" id="contactForm" data-tilt>
+    <form class="contact-form reveal" id="contactForm">
       <div class="field">
         <label for="cf-name">Your name</label>
         <input type="text" id="cf-name" name="name" placeholder="Jane Doe" required>

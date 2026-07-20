@@ -583,28 +583,82 @@ svg.btn-arrow, svg.pl-arrow { width: 16px; height: 16px; stroke-width: 2.5; }
 .squiggle { position: absolute; bottom: 50px; left: -40px; opacity: 0.5; }
 
 .scroll-hint {
+  appearance: none; -webkit-appearance: none; background: none; border: none; padding: 8px;
+  font-family: inherit; cursor: pointer;
   position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 10;
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; color: var(--espresso-light);
   text-transform: uppercase; opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
 }
+.scroll-hint:is(:hover, :active, :focus-visible) { opacity: 1; transform: translateX(-50%) translateY(3px); }
+.scroll-hint:focus-visible { outline: 2px solid var(--blush-mid); outline-offset: 2px; border-radius: 8px; }
 .scroll-line { width: 1.5px; height: 40px; background: linear-gradient(to bottom, var(--blush-mid), transparent); animation: scrollPulse 2s ease infinite; }
 @keyframes scrollPulse { 0% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(0.3); transform-origin: top; } }
+
 .scroll-badge {
-  /* backdrop-filter removed: this badge is position:fixed AND runs a
-     perpetual scrollFloat animation forever — the exact same "always
-     moving + always blurred" combination that made the background
-     shapes so expensive. Bumped opacity up to compensate visually. */
+  appearance: none; -webkit-appearance: none; font-family: inherit; cursor: pointer;
   position: fixed; right: 1.2rem; top: 50%; transform: translateY(-50%); z-index: 20;
-  display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(18, 25, 35, 0.08); border-radius: 999px; padding: 10px 12px;
-  box-shadow: var(--shadow-soft);
-  color: var(--espresso-light); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
-  text-transform: uppercase; writing-mode: vertical-rl; text-orientation: mixed;
-  animation: scrollFloat 4s ease-in-out infinite;
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  background: linear-gradient(160deg, rgba(255,255,255,0.96), rgba(255,255,255,0.82));
+  border: 1px solid rgba(111, 152, 184, 0.18);
+  border-radius: 999px; padding: 11px 9px;
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  color: var(--espresso-light);
+  transition: box-shadow 0.3s var(--ease), background 0.3s var(--ease), transform 0.3s var(--ease-bounce);
+  opacity: 0;
+  animation: badgeIntro 0.7s var(--ease) 1.1s forwards;
 }
-.scroll-badge .scroll-pill { width: 10px; height: 10px; border-radius: 50%; background: var(--blush-mid); box-shadow: 0 0 0 8px rgba(111, 152, 184, 0.15); }
-@keyframes scrollFloat { 0%, 100% { transform: translateY(-50%) translateX(0); } 50% { transform: translateY(-50%) translateX(-5px); } }
+@keyframes badgeIntro {
+  from { opacity: 0; transform: translateY(-50%) translateX(14px); }
+  to { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+.scroll-badge:is(:hover, :active, :focus-visible) {
+  background: linear-gradient(160deg, rgba(255,255,255,1), rgba(255,255,255,0.92));
+  border-color: rgba(111, 152, 184, 0.34);
+  box-shadow: 0 10px 26px rgba(111, 152, 184, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-50%) scale(1.06);
+}
+.scroll-badge:focus-visible { outline: 2px solid var(--blush-mid); outline-offset: 2px; }
+.scroll-badge:is(:hover, :active, :focus-visible) .scroll-label { color: var(--blush-deep); }
+
+.scroll-track {
+  position: relative;
+  width: 3px;
+  height: 38px;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, transparent, rgba(111, 152, 184, 0.35) 20%, rgba(126, 157, 143, 0.3) 80%, transparent);
+}
+.scroll-badge .scroll-pill {
+  position: absolute;
+  left: 50%;
+  top: 0%;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff, var(--blush-mid) 55%, var(--blush-deep) 100%);
+  box-shadow: 0 0 0 5px rgba(111, 152, 184, 0.16), 0 2px 5px rgba(23, 63, 95, 0.28);
+  transform: translate(-50%, -50%);
+  transition: top 0.1s linear, transform 0.2s var(--ease-bounce), box-shadow 0.2s var(--ease);
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'><g fill='%236f98b8'><ellipse cx='13' cy='7' rx='3' ry='5'/><ellipse cx='13' cy='7' rx='3' ry='5' transform='rotate(72 13 13)'/><ellipse cx='13' cy='7' rx='3' ry='5' transform='rotate(144 13 13)'/><ellipse cx='13' cy='7' rx='3' ry='5' transform='rotate(216 13 13)'/><ellipse cx='13' cy='7' rx='3' ry='5' transform='rotate(288 13 13)'/></g><circle cx='13' cy='13' r='2.5' fill='%23173f5f'/></svg>") 13 13, pointer;
+  touch-action: none;
+}
+.scroll-badge .scroll-pill::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+.scroll-badge .scroll-pill:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+.scroll-badge .scroll-pill.dragging {
+  transition: transform 0.15s var(--ease);
+  transform: translate(-50%, -50%) scale(1.4);
+  animation: dotPulse 0.9s ease-in-out infinite;
+}
+.scroll-label {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; writing-mode: vertical-rl; text-orientation: mixed;
+  transition: color 0.2s var(--ease);
+}
 
 /* Back to top (Lucide icon) */
 .back-to-top {
